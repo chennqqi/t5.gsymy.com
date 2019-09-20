@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>百无聊赖</title>
-    <link>http://example.org/</link>
+    <link>/</link>
     <description>Recent content on 百无聊赖</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
     <lastBuildDate>Fri, 20 Sep 2019 14:10:35 +0800</lastBuildDate>
     
-	<atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Hello</title>
-      <link>http://example.org/post/hello/</link>
+      <link>/post/hello/</link>
       <pubDate>Fri, 20 Sep 2019 14:10:35 +0800</pubDate>
       
-      <guid>http://example.org/post/hello/</guid>
+      <guid>/post/hello/</guid>
       <description> harbor漏洞修复 CVE-2019-16097 ##　漏洞描述
 参考　Harbor安全漏洞通告和解决方案
 修复方式 升级harbor版本
