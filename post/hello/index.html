@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="content-language" content="zh-CN" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    
+    
+    <title>Hello</title>
+
+    
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.2.0/anchor.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+                anchors.options = {
+                visible: 'hover',
+                placement: 'left',
+                icon: "?"
+                };
+            anchors.add();
+            })
+        </script>
+        
+        
+
+        
+            <script src="https://cdn.bootcss.com/clipboard.js/2.0.4/clipboard.min.js"></script>
+            <link href="http://example.org/css/tooltips.css" rel="stylesheet">
+            
+        
+
+        
+        
+        <style type="text/css">
+            body {background-color: #fbf6ec;}
+        </style>
+        
+
+        
+        
+            <link rel="stylesheet" href="http://example.org/css/main.css">
+        
+
+        
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+
+</head>
+
+
+<body>
+    <script>
+        window.addEventListener("resize", resizeThrottler, false);
+
+        var resizeTimeout;
+        function resizeThrottler() {
+        
+        if ( !resizeTimeout ) {
+            resizeTimeout = setTimeout(function() {
+            resizeTimeout = null;
+            actualResizeHandler();
+        
+            
+            }, 66);
+        }
+        }
+        actualResizeHandler()
+        function actualResizeHandler() {
+                if (/mobile/i.test(navigator.userAgent) || /android/i.test(navigator.userAgent))
+                {
+                    document.body.classList.add('mobile');
+                }else{
+                    document.body.classList.remove('mobile');  
+                }
+    }</script>
+
+    
+    
+
+
+    
+
+<div class="inner" style="position:relative;">
+  
+  <div class="side-btn"><a href="http://example.org/" class="back">Home</a></div>
+  
+<div class="blog-post">
+  <h2>Hello</h2>
+        
+
+<h1 id="harbor漏洞修复-cve-2019-16097">harbor漏洞修复 CVE-2019-16097</h1>
+
+<p>##　漏洞描述</p>
+
+<p>参考　<a href="https://mp.weixin.qq.com/s?__biz=MzAwNzUyNzI5Mw==&amp;mid=2730791036&amp;idx=1&amp;sn=f33ef47364a5e345f0f85871bab6dd4e&amp;chksm=bc4cfe6e8b3b77787e95e132e4cfd5663b84b4c39dc8e48c2bf1f5fa5918eaf4505003b082e6&amp;mpshare=1&amp;scene=1&amp;srcid=&amp;sharer_sharetime=1568940791906&amp;sharer_shareid=817e8cc69928f92cc39558dc238bc996&amp;key=3d64c8ab0dfd206adb610561efdd4a97fd03cc3b36fc5e578e5e4c2b70216138b7b5dd2185dc173ce88c0bd5afea13dffcf37a5216cd539ed4a87e571ce849dcc92ffc20ec54ee51f419fd6b7a356b6e&amp;ascene=1&amp;uin=NzgxMDMyNDE0&amp;devicetype=Windows+7&amp;version=62060833&amp;lang=zh_CN&amp;pass_ticket=RaS56E%2BVcANTGp9kkrLwritXAfxqmG7DcOANfTpFZM%2BAib83XGVAz9ZGkn%2FUnntF">Harbor安全漏洞通告和解决方案</a></p>
+
+<h2 id="修复方式">修复方式</h2>
+
+<p>升级harbor版本</p>
+
+<h2 id="升级步骤">升级步骤</h2>
+
+<p>1.停止已有harbor服务</p>
+
+<pre><code>cd harbor
+docker-compose down
+cd ..
+</code></pre>
+
+<p>2.备份</p>
+
+<pre><code>#备份程序
+mv harbor &lt;backdir&gt;/
+#备份数据库
+cp -r &lt;harbor_data_dir&gt;/database
+</code></pre>
+
+<p>3.下载新版程序</p>
+
+<pre><code>#下载
+wget https://storage.googleapis.com/harbor-releases/release-1.9.0/harbor-offline-installer-v1.9.0.tgz
+
+#解压缩    
+tar xvf harbor-offline-installer-v1.9.0.tgz
+</code></pre>
+
+<p>4.升级迁移</p>
+
+<pre><code>#拉去升级程序
+docker pull goharbor/harbor-migrator:v1.9.0
+
+#升级配置文件
+docker run -it --rm -v ${harbor_cfg}:/harbor-migration/harbor-cfg/harbor.yml -v ${harbor_yml}:/harbor-migration/harbor-cfg-out/harbor.yml goharbor/harbor-migrator:[tag] --cfg up
+</code></pre>
+
+<p>5.启动新程序</p>
+
+<pre><code>cd harbor
+docker-compose -up
+</code></pre>
+
+  </div>
+
+<br>
+  
+
+<button id="edit-button" class="icon-button" type="button" title="Fork and edit" aria-label="Fork and edit"
+aria-haspopup="true" aria-expanded="false" aria-controls="edit">
+<i class="fa fa-edit">编辑本文</i>
+</button>
+
+
+<br>
+
+
+
+<script src="http://example.org/js/copyCode.js"></script>
+<script src="http://example.org/js/tooltips.js"></script>
+
+
+<footer>
+    <p style="float:right;margin:0 1rem;">
+        &copy; 2019 <a href="https://github.com/chinanf-boy">yobrave Lee.</a>
+        
+      </p>
+  <hr>
+  <hr>
+
+  
+
+  <ul class="tags"  style="float: left!important;">
+      
+      <span>  </span>
+        
+  </ul>
+  
+  <br>
+
+
+</footer>
+</div> 
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+  crossorigin="anonymous"></script>
+<script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-128555056-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag('js', new Date());
+
+  gtag('config', 'UA-128555056-1');
+</script>
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.4/dist/medium-zoom.min.js"></script>
+
+<script>
+  const zoom = mediumZoom()
+  
+  zoom.attach("p img")
+</script>
+
+
+
+
+
+
+<script>
+        document.getElementById("edit-button").addEventListener("click", function () {
+            var editWindow = window.open("https:\/\/github.com\/chennqqi\/t5.gsymy.com/edit/master/content/post\\hello.md");
+        });</script>
+
+    
+
+
+
+
+</body>
+
+</html>
