@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=0.5">
     
     
-    <title>Hello</title>
+    <title>分布式系统中的NWR</title>
 
     
 
@@ -99,59 +99,62 @@
   <div class="side-btn"><a href="/" class="back">Home</a></div>
   
 <div class="blog-post">
-  <h2>Hello</h2>
+  <h2>分布式系统中的NWR</h2>
         
 
-<h1 id="harbor漏洞修复-cve-2019-16097">harbor漏洞修复 CVE-2019-16097</h1>
+<h2 id="意义">意义</h2>
 
-<p>##　漏洞描述</p>
+<p><strong>NWR是一种在分布式存储系统中用于控制一致性级别的一种策略</strong></p>
 
-<p>参考　<a href="https://mp.weixin.qq.com/s?__biz=MzAwNzUyNzI5Mw==&amp;mid=2730791036&amp;idx=1&amp;sn=f33ef47364a5e345f0f85871bab6dd4e&amp;chksm=bc4cfe6e8b3b77787e95e132e4cfd5663b84b4c39dc8e48c2bf1f5fa5918eaf4505003b082e6&amp;mpshare=1&amp;scene=1&amp;srcid=&amp;sharer_sharetime=1568940791906&amp;sharer_shareid=817e8cc69928f92cc39558dc238bc996&amp;key=3d64c8ab0dfd206adb610561efdd4a97fd03cc3b36fc5e578e5e4c2b70216138b7b5dd2185dc173ce88c0bd5afea13dffcf37a5216cd539ed4a87e571ce849dcc92ffc20ec54ee51f419fd6b7a356b6e&amp;ascene=1&amp;uin=NzgxMDMyNDE0&amp;devicetype=Windows+7&amp;version=62060833&amp;lang=zh_CN&amp;pass_ticket=RaS56E%2BVcANTGp9kkrLwritXAfxqmG7DcOANfTpFZM%2BAib83XGVAz9ZGkn%2FUnntF">Harbor安全漏洞通告和解决方案</a></p>
+<h2 id="定义">定义</h2>
 
-<h2 id="修复方式">修复方式</h2>
+<ul>
+<li>N: 同一份数据的副本(replica)份数</li>
+<li>W: 写入一个数据时候要保证成功的份数</li>
+<li>R: 读取一个数据需要读取的副本份数</li>
+</ul>
 
-<p>升级harbor版本</p>
+<h2 id="结论">结论</h2>
 
-<h2 id="升级步骤">升级步骤</h2>
+<p>1.W+R&gt;N时，读写的副本中肯定存在交集，读操作的时候可以根据版本号或者修改时间来比较哪一份是最新数据，所以系统是<strong>强一致性的</strong></p>
 
-<p>1.停止已有harbor服务</p>
+<p>2.W+R&lt;=N时，是<strong>弱一致性的</strong></p>
 
-<pre><code>cd harbor
-docker-compose down
-cd ..
-</code></pre>
+<p>3.(N,W,R)=(1,1,1)时为单机系统</p>
 
-<p>2.备份</p>
+<p>4.(N,W,R)=(2,1,1)时为主从系统（例如redis主从），是弱一致性的；</p>
 
-<pre><code>#备份程序
-mv harbor &lt;backdir&gt;/
-#备份数据库
-cp -r &lt;harbor_data_dir&gt;/database
-</code></pre>
+<p>5.N越大，可靠性越好；W或者N越大性能越差；经验上设置W和R都为N/2+1</p>
 
-<p>3.下载新版程序</p>
+<p>6.(N,W,R)=(3,2,2)时为最小系统，任何时候保证写入两个成功副本即返回；读取时要最少读取两个副本；显然对于最小系统，任意一个节点出现问题后就会退化成(2,1,1)问题</p>
 
-<pre><code>#下载
-wget https://storage.googleapis.com/harbor-releases/release-1.9.0/harbor-offline-installer-v1.9.0.tgz
+<h2 id="故障方案">故障方案</h2>
 
-#解压缩    
-tar xvf harbor-offline-installer-v1.9.0.tgz
-</code></pre>
+<p>1.如果网络故障引起分区，可以让少数节点不提供服务，牺牲可用性来保证可用性；当节点恢复后同步副本日志到这些节点；</p>
 
-<p>4.升级迁移</p>
+<p>2.在要求最终一致性的场景，可以让少数节点分区只提供读取服务，不提供写入服务，待同步后再写入；</p>
 
-<pre><code>#拉去升级程序
-docker pull goharbor/harbor-migrator:v1.9.0
+<p>3.大多折中方案中是牺牲部分一致性来提高可用；</p>
 
-#升级配置文件
-docker run -it --rm -v ${harbor_cfg}:/harbor-migration/harbor-cfg/harbor.yml -v ${harbor_yml}:/harbor-migration/harbor-cfg-out/harbor.yml goharbor/harbor-migrator:[tag] --cfg up
-</code></pre>
+<h2 id="分片">分片</h2>
 
-<p>5.启动新程序</p>
+<p>如果说副本是提高可用性防止单点故障的方案，那么分片就是提高性能的方案；我们在mysql设计中对于大量数据进行分库、分表操作其实就是分片；redis集群的slots其实也是分片；通常利用一个哈希算法来确定（决策）数据写入（坐落于）哪个节点。显然分片可以可以提升单实例的性能，数据分布到不同节点上了，实现了<strong>负载均衡</strong></p>
 
-<pre><code>cd harbor
-docker-compose -up
-</code></pre>
+<h2 id="集群">集群</h2>
+
+<p>在前面的描述中，同一份数据产生N个副本，分布到N个节点上。</p>
+
+<p>Redis的slots，Cassandra的patitions，MongoDB的shards，elastic的shared</p>
+
+<p>我的理解是对于整个分布式系统节点数量M，每一份数目副本数为N,如果M:N=1:1即为上面描述的情况,在实际情况中效率较为低下;当N较大时存在效率低下，数据冗余过多的问题，所以实际中采用M&gt;N的方案。</p>
+
+<p>在elasticsearch中primary shared和replica shared不会分布到同一个节点上，防止单点故障，来保证高可用性，同时对于同一份数据不同的节点也可以提供<strong>负载均衡的作用</strong>。</p>
+
+<p>NWR+分片方案=提高可用性，提高性能</p>
+
+<h2 id="参考出处">参考出处</h2>
+
+<p><a href="https://blog.csdn.net/lavorange/article/details/52489998">https://blog.csdn.net/lavorange/article/details/52489998</a></p>
 
   </div>
 
@@ -183,6 +186,9 @@ aria-haspopup="true" aria-expanded="false" aria-controls="edit">
   
 
   <ul class="tags"  style="float: left!important;">
+      
+        <span>标签:</span>
+        <li><a class="link" href="/tags/distributed"> #distributed </a></li>
       
       <span>  </span>
         
@@ -230,7 +236,7 @@ aria-haspopup="true" aria-expanded="false" aria-controls="edit">
 
 <script>
         document.getElementById("edit-button").addEventListener("click", function () {
-            var editWindow = window.open("https:\/\/github.com\/chennqqi\/t5.gsymy.com/edit/master/content/post\\hello.md");
+            var editWindow = window.open("https:\/\/github.com\/chennqqi\/t5.gsymy.com/edit/master/content/post\\distribute_nwr.md");
         });</script>
 
     
